@@ -1,0 +1,11 @@
+﻿@Backend_HostAddress = https://localhost:7071
+
+POST {{Backend_HostAddress}}/students
+Content-Type: application/json
+
+{
+    "id": 4,
+    "name": "Priya",
+    "age": 22,
+    "course": "Full Stack"
+}

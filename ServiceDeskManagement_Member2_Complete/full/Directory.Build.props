@@ -1,0 +1,10 @@
+<Project>
+  <!-- setup.ps1 rewrites this file to match the .NET SDK installed on your machine. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <MicrosoftPackagesVersion>8.0.*</MicrosoftPackagesVersion>
+  </PropertyGroup>
+</Project>

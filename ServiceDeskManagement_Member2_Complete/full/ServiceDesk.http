@@ -1,0 +1,86 @@
+### Handy requests for VS Code (REST Client extension) or Visual Studio.
+### The signed-in user comes from "DevUser" in src/ServiceDesk.API/appsettings.json
+### (Role: Employee | ServiceDeskAgent | ServiceDeskManager | Administrator). Restart the API after changing it.
+
+@host = https://localhost:7100
+
+### 1. (Administrator) create a service routed to the IT queue (id 2)
+POST {{host}}/api/services
+Content-Type: application/json
+
+{ "name": "VPN access", "description": "Cannot connect to the VPN", "categoryId": 1, "defaultPriority": "High", "defaultQueueId": 2 }
+
+### 2. (Administrator/Manager) add agent 5 to the IT queue
+POST {{host}}/api/queues/2/members
+Content-Type: application/json
+
+{ "agentEmployeeId": 5 }
+
+### 3. (Employee) create a ticket
+POST {{host}}/api/tickets
+Content-Type: application/json
+
+{ "title": "VPN fails on login", "description": "Error 809 since this morning", "serviceItemId": 1, "priority": "High" }
+
+### 4. (Employee) my tickets, filtered
+GET {{host}}/api/tickets?status=New&priority=High&search=VPN&page=1&pageSize=20
+
+### 5. (Agent/Manager) unassigned tickets
+GET {{host}}/api/tickets/unassigned
+
+### 6. (Manager) assign ticket 1 to agent 5      (as an Agent with EmployeeId 5 you can assign it to yourself)
+POST {{host}}/api/tickets/1/assign
+Content-Type: application/json
+
+{ "agentEmployeeId": 5, "note": "Please take this" }
+
+### 7. (Agent) start work
+POST {{host}}/api/tickets/1/status
+Content-Type: application/json
+
+{ "newStatus": "InProgress" }
+
+### 8. (Agent) internal note (employees never see it)
+POST {{host}}/api/tickets/1/comments
+Content-Type: application/json
+
+{ "body": "Checked the gateway logs, looks like an expired certificate", "isInternal": true }
+
+### 9. (Agent) ask the employee for information
+POST {{host}}/api/tickets/1/status
+Content-Type: application/json
+
+{ "newStatus": "WaitingForUser", "note": "Please send a screenshot of the error" }
+
+### 10. (Employee) reply - the ticket returns to InProgress automatically
+POST {{host}}/api/tickets/1/comments
+Content-Type: application/json
+
+{ "body": "Screenshot attached", "isInternal": false }
+
+### 11. (Agent) resolve - the note is required
+POST {{host}}/api/tickets/1/status
+Content-Type: application/json
+
+{ "newStatus": "Resolved", "note": "Renewed the certificate on the gateway" }
+
+### 12. (Employee) not fixed? reopen within the window
+POST {{host}}/api/tickets/1/reopen
+Content-Type: application/json
+
+{ "reason": "Still cannot connect" }
+
+### 13. (Agent/Manager) escalate to the Finance queue (id 4) ... or to manager 99 with { "managerEmployeeId": 99, ... }
+POST {{host}}/api/tickets/1/escalate
+Content-Type: application/json
+
+{ "targetQueueId": 4, "reason": "Needs the finance team" }
+
+### 14. (Manager) workload per agent
+GET {{host}}/api/agents/workload
+
+### 15. history of a ticket
+GET {{host}}/api/tickets/1/history
+
+### 16. attachments: use Swagger to upload (multipart field "file"), then:
+GET {{host}}/api/tickets/1/attachments
